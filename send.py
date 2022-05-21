@@ -39,7 +39,7 @@ UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 # Send to server using created UDP socket
 
 def send_inputs(throttle, steering):
-    UDPClientSocket.sendto(str.encode(f"{convert_to_twist_range(throttle):.2f},{convert_to_twist_range(steering):.2f}"), serverAddressPort)
+    UDPClientSocket.sendto(str.encode(f"{throttle:.2f},{steering:.2f}"), serverAddressPort)
 
 
 # init gamepad lib
@@ -68,16 +68,16 @@ while run:
     sendcommand = False
     ret, info = joystickapi.joyGetPosEx(id)
     if ret:
-        steering = info.dwXpos-startinfo.dwXpos - 1
-        throttle = -(info.dwRpos-startinfo.dwRpos)
+        steering = convert_to_twist_range(info.dwXpos-startinfo.dwXpos - 1)
+        throttle = convert_to_twist_range(-(info.dwRpos-startinfo.dwRpos))
         
-        if abs(steering-last_steering) > 10:
-            print(f"steering changed to {steering}, {convert_to_twist_range(steering)}")
+        if abs(steering-last_steering) > 0.02:
+            print(f"steering changed to {steering}")
             last_steering = steering
             sendcommand = True
             
-        if abs(throttle-last_throttle) > 10:
-            print(f"throttle changed to {throttle},  {convert_to_twist_range(throttle)}")
+        if abs(throttle-last_throttle) > 0.02:
+            print(f"throttle changed to {throttle}")
             last_throttle = throttle
             sendcommand = True
 
