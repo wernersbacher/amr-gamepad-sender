@@ -39,7 +39,7 @@ UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 # Send to server using created UDP socket
 
 def send_inputs(throttle, steering):
-    UDPClientSocket.sendto(str.encode(f"{throttle:.2f},{steering:.2f}"), serverAddressPort)
+    UDPClientSocket.sendto(str.encode(f"{throttle:.4f},{steering:.4f}"), serverAddressPort)
 
 
 # init gamepad lib
@@ -71,12 +71,12 @@ while run:
         steering = convert_to_twist_range(info.dwXpos-startinfo.dwXpos - 1)
         throttle = convert_to_twist_range(-(info.dwRpos-startinfo.dwRpos))
         
-        if abs(steering-last_steering) > 0.02:
+        if abs(steering-last_steering) > 0.002:
             print(f"steering changed to {steering}")
             last_steering = steering
             sendcommand = True
             
-        if abs(throttle-last_throttle) > 0.02:
+        if abs(throttle-last_throttle) > 0.002:
             print(f"throttle changed to {throttle}")
             last_throttle = throttle
             sendcommand = True
