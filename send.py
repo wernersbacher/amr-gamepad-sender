@@ -72,16 +72,15 @@ while run:
         throttle = convert_to_twist_range(-(info.dwRpos-startinfo.dwRpos))
         
         if abs(steering-last_steering) > 0.002:
-            print(f"steering changed to {steering}")
             last_steering = steering
             sendcommand = True
             
         if abs(throttle-last_throttle) > 0.002:
-            print(f"throttle changed to {throttle}")
             last_throttle = throttle
             sendcommand = True
 
         if sendcommand:
+            print(f"throttle={throttle:.4f}________steering={steering:.4f}________", end="\r")
             send_inputs(throttle=throttle, steering=steering)
 
             
