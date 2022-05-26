@@ -69,7 +69,7 @@ while run:
     ret, info = joystickapi.joyGetPosEx(id)
     if ret:
         steering = convert_to_twist_range(info.dwXpos-startinfo.dwXpos - 1)
-        throttle = convert_to_twist_range(-(info.dwRpos-startinfo.dwRpos))
+        throttle = convert_to_twist_range(-info.dwRpos+startinfo.dwRpos)
         
         if abs(steering-last_steering) > 0.002:
             last_steering = steering
@@ -80,7 +80,7 @@ while run:
             sendcommand = True
 
         if sendcommand:
-            print(f"throttle={throttle:.4f}________steering={steering:.4f}________", end="\r")
+            print(f"throttle={throttle:.4f}_____steering={steering:.4f}_____", end="\r")
             send_inputs(throttle=throttle, steering=steering)
 
             
