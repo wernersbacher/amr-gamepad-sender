@@ -11,6 +11,23 @@ LOWER_THRESHOLD = -32768
 DEADZONE = 5000
 
 
+GEARS = [0.25, 0.3, 0.37, 0.48, 0.71, 1.0]
+BACKWARDS_GEAR = 0.2
+MAX_GEAR = len(GEARS)
+
+def get_gear_factor(gear: int) -> float:
+    if gear > MAX_GEAR:
+        gear = MAX_GEAR
+    elif gear < 1:
+        gear = 1
+    return GEARS[gear-1]
+
+def inc_max(num, max_num):
+    return min(num+1, max_num)
+
+def dec_min(num, min_num):
+    return max(num-1, min_num)
+
 def convert_to_twist_range(x):
     if x >= UPPER_THRESHOLD:
         return 1.0
@@ -60,6 +77,11 @@ run = ret
 last_throttle = 0
 last_steering = 0
 
+current_gear = 1
+
+old_r1 = False
+old_l1 = False
+
 while run:
     time.sleep(1/HZ)
     if msvcrt.kbhit() and msvcrt.getch() == chr(27).encode(): # detect ESC
@@ -68,9 +90,32 @@ while run:
     sendcommand = False
     ret, info = joystickapi.joyGetPosEx(id)
     if ret:
-        steering = convert_to_twist_range(info.dwXpos-startinfo.dwXpos - 1)
+        # buttons auslesen
+        btns = [(1 << i) & info.dwButtons != 0 for i in range(caps.wNumButtons)]
+        l1, r1 = btns[4], btns[5]
+                
+        # hoch und runterschalten, bedinungen an button knüpfen
+        if r1 and not old_r1:
+            current_gear = inc_max(current_gear, MAX_GEAR)
+            sendcommand = True
+        if l1 and not old_l1:
+            current_gear = dec_min(current_gear, 1)
+            sendcommand = True
+        
+        old_l1, old_r1 = l1, r1
+
+        # gas und lenkung auslesen
+        steering = convert_to_twist_range(info.dwXpos-startinfo.dwXpos - 1) 
+        # convert right stick to speed
         throttle = convert_to_twist_range(-info.dwRpos+startinfo.dwRpos)
         
+        # if driving forward, apply gearing
+        if throttle > 0:
+            throttle *= get_gear_factor(current_gear)  
+        else: # only one backward speed!
+            throttle *= BACKWARDS_GEAR
+            
+        # schauen ob neue werte gesendet werden sollen
         if abs(steering-last_steering) > 0.002:
             last_steering = steering
             sendcommand = True
@@ -78,10 +123,11 @@ while run:
         if abs(throttle-last_throttle) > 0.002:
             last_throttle = throttle
             sendcommand = True
-
+ 
         if sendcommand:
-            print(f"throttle={throttle:.4f}_____steering={steering:.4f}_____", end="\r")
             send_inputs(throttle=throttle, steering=steering)
+            print(f"gear={current_gear}____throttle={throttle:.4f}_____steering={steering:.4f}_____", end="\r")
+           
 
             
             
