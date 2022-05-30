@@ -12,7 +12,7 @@ DEADZONE = 5000
 
 
 GEARS = [0.25, 0.3, 0.37, 0.48, 0.71, 1.0]
-BACKWARDS_GEAR = 0.2
+BACKWARDS_GEAR = 0.23
 MAX_GEAR = len(GEARS)
 
 def get_gear_factor(gear: int) -> float:
