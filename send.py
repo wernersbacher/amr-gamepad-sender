@@ -11,8 +11,8 @@ LOWER_THRESHOLD = -32768
 DEADZONE = 5000
 
 
-GEARS = [0.27, 0.29, 0.3, 0.32, 0.35, 0.4, 0.7, 1.0]
-BACKWARDS_GEAR = 0.23
+GEARS = [0.255, 0.26, 0.27, 0.28, 0.29, 0.3, 0.31, 0.4, 0.7, 1.0]
+BACKWARDS_GEAR = 0.25
 MAX_GEAR = len(GEARS)
 
 def get_gear_factor(gear: int) -> float:
